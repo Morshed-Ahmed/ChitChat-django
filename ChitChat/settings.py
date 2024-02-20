@@ -26,6 +26,7 @@ SECRET_KEY = 'django-insecure-74q=c5b^b1+roifr5jce*7ifbjm9ztnx5d*j)o7ti7o#a2!m0+
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
+CSRF_TRUSTED_ORIGINS = ['https://chitchat-w725.onrender.com','https://*.127.0.0.1']
 
 
 # Application definition
