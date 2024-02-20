@@ -1,0 +1,95 @@
+<!-- friend_requests.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Friend Requests</title>
+  </head>
+  <body>
+    <a href="{% url 'home' %}">Home</a>
+    <a href="{% url 'add_friend' %}">Add Friend</a>
+    <a href="{% url 'friend_requests' %}">Friend Requests</a>
+    <h1>Friend Requests</h1>
+
+    <!-- Form to send friend request -->
+    <form id="sendFriendRequestForm">
+      <label for="receiverId">Receiver ID:</label>
+      <input type="text" id="receiverId" name="receiverId" required />
+      <button type="submit">Send Friend Request</button>
+    </form>
+
+    <!-- List to display friend requests -->
+    <ul id="friendRequestsList"></ul>
+
+    <script>
+      // friend_requests.js
+
+      const wsUri = "ws://127.0.0.1:8000/ws/friend-request/";
+      const websocket = new WebSocket(wsUri);
+
+      websocket.onopen = function (event) {
+        console.log("WebSocket connection established.");
+      };
+
+      websocket.onmessage = function (event) {
+        const data = JSON.parse(event.data);
+        const type = data.type;
+
+        if (type === "friend_request") {
+          // Handle friend request notification
+          const senderId = data.sender_id;
+          const listItem = document.createElement("li");
+          listItem.textContent = `Received friend request from user ${senderId}.`;
+          document.getElementById("friendRequestsList").appendChild(listItem);
+        } else if (type === "friend_request_confirmation") {
+          // Handle friend request confirmation notification
+          const receiverId = data.receiver_id;
+          console.log(`Friend request confirmed by user ${receiverId}.`);
+        } else if (type === "friend_request_deletion") {
+          // Handle friend request deletion notification
+          const requestId = data.request_id;
+          console.log(`Friend request with ID ${requestId} deleted.`);
+        }
+      };
+
+      document
+        .getElementById("sendFriendRequestForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+          const senderId = getUserId(); // Implement a function to get the sender ID
+          const receiverId = document.getElementById("receiverId").value;
+          sendFriendRequest(senderId, receiverId);
+        });
+
+      function sendFriendRequest(senderId, receiverId) {
+        const data = {
+          action: "send_request",
+          sender_id: senderId,
+          receiver_id: receiverId,
+        };
+        websocket.send(JSON.stringify(data));
+      }
+
+      function confirmFriendRequest(requestId) {
+        const data = {
+          action: "confirm_request",
+          request_id: requestId,
+        };
+        websocket.send(JSON.stringify(data));
+      }
+
+      function deleteFriendRequest(requestId, otherPartyId) {
+        const data = {
+          action: "delete_request",
+          request_id: requestId,
+          other_party_id: otherPartyId,
+        };
+        websocket.send(JSON.stringify(data));
+      }
+
+      // Other functions like getUserId can be added here
+    </script>
+  </body>
+</html>

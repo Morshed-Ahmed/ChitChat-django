@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bootstrap demo</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+  </head>
+
+  <style>
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      font-weight: bold;
+    }
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 4px;
+      box-sizing: border-box;
+      background-color: #282c34;
+      color: white;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #fff;
+      color: black;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #cfd6e6;
+    }
+  </style>
+  <body style="background-color: #221b49">
+    <div
+      class="card border-secondary mb-3 mx-auto mt-5 text-light"
+      style="max-width: 28rem; background-color: #17191f"
+    >
+      <div class="card-header bg-transparent border-secondary text-light">
+        Log in
+      </div>
+      <div class="card-body text-light">
+        <form method="post">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="id_username">Username</label>
+            {{ form.username }}
+          </div>
+          <div class="form-group">
+            <label for="id_password">Password:</label>
+            {{ form.password }}
+          </div>
+          <button type="submit" class="">Log in</button>
+        </form>
+      </div>
+      <div class="card-footer bg-transparent border-secondary text-center">
+        Not a member yet? <a href="{% url 'register' %}">Sign up</a>
+      </div>
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>

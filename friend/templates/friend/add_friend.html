@@ -1,0 +1,167 @@
+{% comment %} <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Friend</title>
+  </head>
+  <body>
+    <h1>Add Friend</h1>
+    <h5>{{ user.username }}</h5>
+
+    <button onclick="sendAddFriendRequest(4)">Add Friend</button>
+
+    <script>
+            function sendAddFriendRequest(receiverId) {
+              var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+              var ws_path = ws_scheme + "://" + window.location.host + "/ws/friend-request/";
+              var ws = new WebSocket(ws_path);
+
+              ws.onopen = function(event) {
+                // WebSocket connection is open, you can now send data
+                console.log("WebSocket connection established");
+
+                // Example of sending a friend request
+                ws.send(
+                  JSON.stringify({
+                    action: "add_friend_request",
+                    sender_id: {{ user.id }},
+                    receiver_id: receiverId
+                  })
+                );
+              };
+
+              ws.onmessage = function(event) {
+                var data = JSON.parse(event.data);
+
+                if (data.users) {
+                  // Handle user search results
+                  console.log("Received user search results:", data.users);
+                }else{
+                  console.log('not data')
+                }
+                if (data.notification) {
+                  // Handle friend request notification
+                  console.log("notification");
+                  alert("You have received a friend request!");
+                } else {
+                  console.log("error notification");
+                }
+              };
+
+              function searchUsers(query) {
+          // Send user search query to server
+          ws.send(JSON.stringify({'action': 'search_users', 'query': query}));
+      }
+
+              ws.onerror = function(error) {
+                // Handle WebSocket errors
+                console.error("WebSocket error: ", error);
+              };
+
+              ws.onclose = function(event) {
+                // Handle WebSocket closure
+                console.log("WebSocket connection closed");
+              };
+            }
+    </script>
+  </body>
+</html>
+{% endcomment %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Search and Friend Request</title>
+  </head>
+  <body>
+    <h1>User Search and Friend Request</h1>
+    <div>
+      <label for="searchInput">Search Users:</label>
+      <input type="text" id="searchInput" placeholder="Enter username" />
+      <button onclick="searchUsers()">Search</button>
+    </div>
+    <div id="userList"></div>
+
+    <script>
+      function searchUsers() {
+        const query = document.getElementById("searchInput").value;
+        const ws_scheme = window.location.protocol === "https:" ? "wss" : "ws";
+        const ws_path = `${ws_scheme}://${window.location.host}/ws/user-search/`;
+        const ws = new WebSocket(ws_path);
+
+        ws.onopen = function (event) {
+          console.log("WebSocket connection established");
+          ws.send(JSON.stringify({ query: query }));
+        };
+
+        ws.onmessage = function (event) {
+          const data = JSON.parse(event.data);
+          displayUsers(data.users);
+        };
+
+        ws.onerror = function (error) {
+          console.error("WebSocket error:", error);
+        };
+
+        ws.onclose = function (event) {
+          console.log("WebSocket connection closed");
+        };
+      }
+
+      function displayUsers(users) {
+        const userList = document.getElementById("userList");
+        userList.innerHTML = ""; // Clear previous search results
+        if (users.length === 0) {
+          userList.innerHTML = "<p>No users found</p>";
+          return;
+        }
+        const ul = document.createElement("ul");
+        users.forEach((user) => {
+          const li = document.createElement("li");
+          li.textContent = user.username;
+          const button = document.createElement("button");
+          button.textContent = "Send Friend Request";
+          button.onclick = function () {
+            sendFriendRequest(user.id);
+          };
+          li.appendChild(button);
+          ul.appendChild(li);
+        });
+        userList.appendChild(ul);
+      }
+
+      function sendFriendRequest(receiverId) {
+        const ws_scheme = window.location.protocol === "https:" ? "wss" : "ws";
+        const ws_path = `${ws_scheme}://${window.location.host}/ws/friend-request/`;
+        const ws = new WebSocket(ws_path);
+
+        ws.onopen = function (event) {
+          console.log("WebSocket connection established");
+          ws.send(
+            JSON.stringify({
+              action: "send_friend_request",
+              sender_id: {{user.id}}, // Implement this function to get the current user's ID
+              receiver_id: receiverId,
+            })
+          );
+        };
+
+        ws.onmessage = function (event) {
+          const data = JSON.parse(event.data);
+          alert(data.message); // Display confirmation message
+        };
+
+        ws.onerror = function (error) {
+          console.error("WebSocket error:", error);
+        };
+
+        ws.onclose = function (event) {
+          console.log("WebSocket connection closed");
+        };
+      }
+    </script>
+  </body>
+</html>
